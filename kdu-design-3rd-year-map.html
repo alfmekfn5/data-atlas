@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>경동대학교 디자인학과 3학년 인물지도 · 데이터 시각화</title>
+  <style>
+    :root {
+      --bg: #f7f7f5;
+      --surface: #ffffff;
+      --ink: #111113;
+      --muted: #5b5e66;
+      --line: #e2e2de;
+      --accent: #2563eb;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.5;
+    }
+    .wrap { max-width: 1240px; margin: 0 auto; padding: 32px 24px 72px; }
+    header {
+      display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end;
+      gap: 16px; border-bottom: 1px solid var(--line); padding-bottom: 24px; margin-bottom: 32px;
+    }
+    h1 { margin: 8px 0 0; font-size: clamp(24px, 3vw, 38px); letter-spacing: -0.02em; }
+    .kicker { font-size: 13px; color: var(--muted); }
+    .controls { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 20px; align-items: center; }
+    .btn {
+      border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+      padding: 8px 14px; border-radius: 8px; cursor: pointer; font-size: 13px; font-weight: 500;
+    }
+    .btn.active { background: var(--ink); color: #fff; border-color: var(--ink); }
+    input[type="search"] {
+      padding: 8px 12px; border: 1px solid var(--line); border-radius: 8px;
+      background: var(--surface); font-size: 13px; min-width: 220px;
+    }
+    .map-shell {
+      display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; margin-bottom: 40px;
+    }
+    @media (max-width: 900px) { .map-shell { grid-template-columns: 1fr; } }
+    .panel {
+      background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px;
+    }
+    svg { width: 100%; height: auto; display: block; background: #fbfbfa; border-radius: 10px; border: 1px solid var(--line); }
+    .grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px;
+    }
+    .card {
+      background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 20px;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .card:hover { transform: translateY(-2px); border-color: #b8bcc4; }
+    .meta { font-size: 12px; color: var(--muted); margin-bottom: 6px; font-variant-numeric: tabular-nums; }
+    .name { font-size: 20px; font-weight: 700; margin: 0 0 8px; }
+    .row { font-size: 13px; margin: 4px 0; color: #2d2f36; }
+    .links { display: flex; gap: 12px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); font-size: 12px; }
+    a { color: var(--accent); text-decoration: none; font-weight: 500; }
+    a:hover { text-decoration: underline; }
+    .note { margin-top: 8px; font-size: 12px; color: #b45309; background: #fef3c7; padding: 6px 10px; border-radius: 6px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div>
+        <div class="kicker">경동대학교 디자인학과 3학년 아카이브 · 15명</div>
+        <h1>디자인학과 3학년 인물지도 데이터 시각화</h1>
+      </div>
+      <div class="kicker">단일 HTML 오프라인 뷰어</div>
+    </header>
+
+    <div class="controls">
+      <button class="btn active" data-scope="metro">수도권 · 강원 상세</button>
+      <button class="btn" data-scope="national">전국 (거제 포함)</button>
+      <input id="search" type="search" placeholder="이름, 지역, 취미, 아끼는 것 검색..." />
+    </div>
+
+    <div class="map-shell">
+      <div class="panel">
+        <svg id="map" viewBox="0 0 820 520" role="img" aria-label="인물지도"></svg>
+      </div>
+      <div class="panel" id="inspector">
+        <div class="kicker">인물 상세 정보</div>
+        <h2 style="margin:8px 0">노드를 선택하세요</h2>
+        <p style="font-size:14px;color:var(--muted)">지도 위의 인물 마커를 클릭하면 거주지, 취미, 아끼는 가치, GitHub Pages 및 인스타그램 링크가 표시됩니다.</p>
+      </div>
+    </div>
+
+    <div class="grid" id="grid"></div>
+  </div>
+
+  <script>
+    const DATA = {"students":[{"id":"park-jongseok","index":1,"name":"박종석","githubUrl":"https://github.com/John02-design","githubHandle":"John02-design","pagesUrl":"https://john02-design.github.io/1234/","instagramHandle":"@I_am_jongseok","instagramUrl":"https://www.instagram.com/I_am_jongseok/","hobbiesRaw":"일렉기타, 영화감상","hobbies":["일렉기타","영화감상"],"hobbyClusters":["music","media"],"addressRaw":"경기도 의정부시 민락동","cityLabel":"의정부시 민락동","regionGroup":"uijeongbu","regionLabel":"의정부시","treasureRaw":"나","treasureCategory":"self","genderRaw":"미입력","lat":37.745,"lng":127.102,"metroOffset":{"dx":14,"dy":4},"mentionsPeerIds":[]},{"id":"park-junyoung","index":2,"name":"박준영","githubUrl":"https://github.com/alex60796-bot","githubHandle":"alex60796-bot","pagesUrl":"https://alex60796-bot.github.io/dkssudgktpdy/","instagramHandle":"@jxn.y0xn9","instagramUrl":"https://www.instagram.com/jxn.y0xn9/","hobbiesRaw":"피파","hobbies":["피파"],"hobbyClusters":["gaming"],"addressRaw":"경기도 의정부시 의정부동","cityLabel":"의정부시 의정부동","regionGroup":"uijeongbu","regionLabel":"의정부시","treasureRaw":"김보라","treasureCategory":"peer","genderRaw":"공룡","lat":37.738,"lng":127.043,"metroOffset":{"dx":-14,"dy":2},"mentionsPeerIds":["kim-bora"]},{"id":"kang-minseo","index":3,"name":"강민서","githubUrl":"https://github.com/rlverms","githubHandle":"rlverms","pagesUrl":"https://rlverms.github.io/rlverms/","instagramHandle":"@rlverms","instagramUrl":"https://www.instagram.com/rlverms/","hobbiesRaw":"쿠리만쥬 인형 구매, 영화 시청, 음악 감상","hobbies":["쿠리만쥬 인형 구매","영화 시청","음악 감상"],"hobbyClusters":["fandom","media","music"],"addressRaw":"서울특별시 노원구 상계동","cityLabel":"노원구 상계동","regionGroup":"seoul","regionLabel":"서울특별시","treasureRaw":"엄마","treasureCategory":"family","genderRaw":"여자","lat":37.658,"lng":127.068,"metroOffset":{"dx":12,"dy":-2},"mentionsPeerIds":[]},{"id":"park-jeongbin","index":4,"name":"박정빈","githubUrl":"https://github.com/ImSAKUYAmyfriendisRYO","githubHandle":"ImSAKUYAmyfriendisRYO","pagesUrl":"https://imsakuyamyfriendisryo.github.io/-/","instagramHandle":"@upfstpu.2","instagramUrl":"https://www.instagram.com/upfstpu.2/","hobbiesRaw":"노래듣기","hobbies":["노래듣기"],"hobbyClusters":["music","fandom"],"addressRaw":"거제시 장평동","cityLabel":"경남 거제시 장평동","regionGroup":"gyeongnam","regionLabel":"경상남도","treasureRaw":"나 ^.....^","treasureCategory":"self","genderRaw":"여자","lat":34.892,"lng":128.613,"mentionsPeerIds":[]},{"id":"kim-narim","index":5,"name":"김나림","githubUrl":"https://github.com/nalimgim947","githubHandle":"nalimgim947","pagesUrl":null,"pagesNote":"GitHub Pages 미제출","instagramHandle":"@thisisimrimthis","instagramUrl":"https://www.instagram.com/thisisimrimthis/","hobbiesRaw":"그림, 음악, 운동, 애니","hobbies":["그림","음악","운동","애니"],"hobbyClusters":["craft","music","wellness","media"],"addressRaw":"경기도 동두천시","cityLabel":"경기도 동두천시","regionGroup":"gyeonggi-other","regionLabel":"경기 북·동부","treasureRaw":"나라고 나","treasureCategory":"self","genderRaw":"덩엉이","lat":37.903,"lng":127.06,"mentionsPeerIds":[]},{"id":"kim-bora","index":6,"name":"김보라","githubUrl":"https://github.com/KIMBORA050411","githubHandle":"KIMBORA050411","pagesUrl":"https://kimbora050411.github.io/050411/","instagramHandle":"@b0.ra.4","instagramUrl":"https://www.instagram.com/b0.ra.4/","hobbiesRaw":"공포 보기","hobbies":["공포 보기"],"hobbyClusters":["media"],"addressRaw":"경기도 의정부시 금오동","cityLabel":"의정부시 금오동","regionGroup":"uijeongbu","regionLabel":"의정부시","treasureRaw":"김복돌","treasureCategory":"life","genderRaw":"여자","lat":37.756,"lng":127.074,"metroOffset":{"dx":0,"dy":-16},"mentionsPeerIds":[]},{"id":"kim-seunggi","index":7,"name":"김승기","githubUrl":"https://github.com/Seung7l","githubHandle":"Seung7l","pagesUrl":"https://seung7l.github.io/DoSiMoonWhaSulGye/","instagramHandle":"@_seung7l","instagramUrl":"https://www.instagram.com/_seung7l/","hobbiesRaw":"네줄기타","hobbies":["네줄기타"],"hobbyClusters":["music"],"addressRaw":"경기도 구리시 인창동","cityLabel":"구리시 인창동","regionGroup":"gyeonggi-other","regionLabel":"경기 북·동부","treasureRaw":"바로바로 나!","treasureCategory":"self","genderRaw":"남자","lat":37.603,"lng":127.139,"mentionsPeerIds":[]},{"id":"moon-minhee","index":8,"name":"문민희","githubUrl":"https://github.com/massiag41-art","githubHandle":"massiag41-art","pagesUrl":"https://massiag41-art.github.io/1233/","instagramHandle":"@mini3061","instagramUrl":"https://www.instagram.com/mini3061/","hobbiesRaw":"게임","hobbies":["게임"],"hobbyClusters":["gaming"],"addressRaw":"경기도 남양주시","cityLabel":"경기도 남양주시","regionGroup":"gyeonggi-other","regionLabel":"경기 북·동부","treasureRaw":"가족, 망고, 여름","treasureCategory":"family","genderRaw":"여자","lat":37.636,"lng":127.216,"mentionsPeerIds":[]},{"id":"min-jehui","index":9,"name":"민제희","githubUrl":"https://github.com/alfmekfn5","githubHandle":"alfmekfn5","pagesUrl":"https://alfmekfn5.github.io/555/","instagramHandle":"@mirdar.u_","instagramUrl":"https://www.instagram.com/mirdar.u_/","hobbiesRaw":"게임, 운동, 기깔나게 자기","hobbies":["게임","운동","기깔나게 자기"],"hobbyClusters":["gaming","wellness"],"addressRaw":"강원도 춘천시","cityLabel":"강원도 춘천시","regionGroup":"gangwon","regionLabel":"강원도","treasureRaw":"가족들, 이연우 <<<<<<<<<<<<<< 정유림","treasureCategory":"peer","genderRaw":"경동대제국 1황녀","extraNote":"어머니 저는 2층에서 뛰어내려서 등교하겠습니다 -> 상여자","lat":37.881,"lng":127.73,"mentionsPeerIds":["jung-yurim"]},{"id":"yoon-sua","index":10,"name":"윤수아","githubUrl":"https://github.com/tndk0512-ux","githubHandle":"tndk0512-ux","pagesUrl":"https://tndk0512-ux.github.io/index/","instagramHandle":"@tnd_0_5","instagramUrl":"https://www.instagram.com/tnd_0_5/","hobbiesRaw":"기타, 애니, 음악듣기","hobbies":["기타","애니","음악듣기"],"hobbyClusters":["music","media"],"addressRaw":"서울특별시 송파구 마천동","cityLabel":"송파구 마천동","regionGroup":"seoul","regionLabel":"서울특별시","treasureRaw":"동생","treasureCategory":"family","genderRaw":"여자","lat":37.495,"lng":127.152,"mentionsPeerIds":[]},{"id":"lee-jimin","index":11,"name":"이지민","githubUrl":"https://github.com/leejimin0","githubHandle":"leejimin0","pagesUrl":"https://leejimin0.github.io/ezym/","instagramHandle":"@tonmozza","instagramUrl":"https://www.instagram.com/tonmozza/","hobbiesRaw":"독서","hobbies":["독서"],"hobbyClusters":["craft"],"addressRaw":"경기도 하남시 망월동","cityLabel":"하남시 망월동","regionGroup":"gyeonggi-other","regionLabel":"경기 북·동부","treasureRaw":"가족","treasureCategory":"family","genderRaw":"여자","lat":37.562,"lng":127.19,"mentionsPeerIds":[]},{"id":"jung-yurim","index":12,"name":"정유림","githubUrl":"https://github.com/yourrime0502-afk","githubHandle":"yourrime0502-afk","pagesUrl":"https://yourrime0502-afk.github.io/kdu1/","instagramHandle":"@nollimmm","instagramUrl":"https://www.instagram.com/nollimmm?mdxt=MWNnNHBwZm5kNWI4NQ==","hobbiesRaw":"콘서트 관람","hobbies":["콘서트 관람"],"hobbyClusters":["fandom","music"],"addressRaw":"서울특별시 동대문구 답십리2동","cityLabel":"동대문구 답십리2동","regionGroup":"seoul","regionLabel":"서울특별시","treasureRaw":"우리 엄마, 이성열 미모","treasureCategory":"family","genderRaw":"여자","lat":37.572,"lng":127.055,"mentionsPeerIds":[]},{"id":"choi-yunyoung","index":13,"name":"최윤영","githubUrl":"https://github.com/usagi030dd","githubHandle":"usagi030dd","pagesUrl":"https://usagi030dd.github.io/samples/","pagesNote":"원본 표기: https://usagi030dd.github.io/samples/ 입니다.","instagramHandle":"@usagi030dd","instagramUrl":"https://www.instagram.com/usagi030dd/","hobbiesRaw":"음악 감상 및 연주(통기타&일렉)","hobbies":["통기타 & 일렉 연주","음악 감상"],"hobbyClusters":["music"],"addressRaw":"서울특별시 도봉구 쌍문동","cityLabel":"도봉구 쌍문동","regionGroup":"seoul","regionLabel":"서울특별시","treasureRaw":"엄마","treasureCategory":"family","genderRaw":"여자","lat":37.648,"lng":127.032,"metroOffset":{"dx":-16,"dy":4},"mentionsPeerIds":[]},{"id":"choi-yunji","index":14,"name":"최윤지","githubUrl":"https://github.com/choiyg1105-cloud","githubHandle":"choiyg1105-cloud","pagesUrl":"https://choiyg1105-cloud.github.io/save/","instagramHandle":"@yum._.crochet","instagramUrl":"https://www.instagram.com/yum._.crochet/","hobbiesRaw":"우쿨렐레, 뜨개질","hobbies":["우쿨렐레","뜨개질"],"hobbyClusters":["music","craft"],"addressRaw":"경기도 포천시","cityLabel":"경기도 포천시","regionGroup":"gyeonggi-other","regionLabel":"경기 북·동부","treasureRaw":"건강","treasureCategory":"life","genderRaw":"여자","lat":37.894,"lng":127.2,"mentionsPeerIds":[]},{"id":"shin-danha","index":15,"name":"신단하","githubUrl":"https://github.com/danhaaaa","githubHandle":"danhaaaa","pagesUrl":"https://danhaaaa.github.io/sakuya/","instagramHandle":"@danha_naa","instagramUrl":"https://www.instagram.com/danha_naa/","hobbiesRaw":"위시 사랑하기","hobbies":["위시 사랑하기"],"hobbyClusters":["fandom"],"addressRaw":"경기도 의정부시 신곡2동","cityLabel":"의정부시 신곡2동","regionGroup":"uijeongbu","regionLabel":"의정부시","treasureRaw":"동생","treasureCategory":"family","genderRaw":"여자","lat":37.734,"lng":127.072,"metroOffset":{"dx":2,"dy":16},"mentionsPeerIds":[]}],"clusters":[{"id":"music","label":"음악 · 악기 연주","description":"일렉·통·네줄기타, 우쿨렐레, 노래 및 음악 감상","color":"#2563EB"},{"id":"media","label":"영화 · 애니 · 공포","description":"영화감상, 애니메이션, 공포 콘텐츠 시청","color":"#0D9488"},{"id":"gaming","label":"게임 · 피파","description":"PC·콘솔·모바일 게임 및 스포츠 게임","color":"#4F46E5"},{"id":"wellness","label":"운동 · 수면 · 건강","description":"운동, 기깔나게 자기 등 일상 활력","color":"#D97706"},{"id":"craft","label":"그림 · 독서 · 뜨개질","description":"드로잉, 독서, 크로셰 뜨개 공예","color":"#059669"},{"id":"fandom","label":"콘서트 · 덕질 · 컬렉션","description":"위시 사랑하기, 콘서트 관람, 쿠리만쥬 인형 수집","color":"#E11D48"}],"regionLabels":{"uijeongbu":"의정부시","seoul":"서울특별시","gyeonggi-other":"경기 북·동부","gangwon":"강원도","gyeongnam":"경상남도"},"regionColors":{"uijeongbu":"#2563EB","seoul":"#0F172A","gyeonggi-other":"#0D9488","gangwon":"#D97706","gyeongnam":"#E11D48"}};
+    let scope = 'metro';
+    let selectedId = DATA.students[0].id;
+    let query = '';
+
+    function project(lat, lng) {
+      if (scope === 'metro') {
+        const minLng = 126.86, maxLng = 127.86, minLat = 37.42, maxLat = 37.96;
+        const x = 50 + ((lng - minLng) / (maxLng - minLng)) * 720;
+        const y = 470 - ((lat - minLat) / (maxLat - minLat)) * 420;
+        return { x, y };
+      } else {
+        const minLng = 125.6, maxLng = 129.6, minLat = 34.2, maxLat = 38.6;
+        const x = 90 + ((lng - minLng) / (maxLng - minLng)) * 640;
+        const y = 480 - ((lat - minLat) / (maxLat - minLat)) * 430;
+        return { x, y };
+      }
+    }
+
+    function renderInspector() {
+      const s = DATA.students.find(x => x.id === selectedId) || DATA.students[0];
+      const el = document.getElementById('inspector');
+      el.innerHTML = `
+        <div class="meta">${String(s.index).padStart(2,'0')} · ${s.cityLabel} · ${s.genderRaw}</div>
+        <h2 style="margin:0 0 12px;font-size:26px;">${s.name}</h2>
+        <div class="row"><strong>주소:</strong> ${s.addressRaw}</div>
+        <div class="row"><strong>취미:</strong> ${s.hobbiesRaw}</div>
+        <div class="row"><strong>세상에서 가장 아끼는 것:</strong> ${s.treasureRaw}</div>
+        ${s.extraNote ? `<div class="note">${s.extraNote}</div>` : ''}
+        <div class="links">
+          <a href="${s.githubUrl}" target="_blank" rel="noreferrer">GitHub</a>
+          ${s.pagesUrl ? `<a href="${s.pagesUrl}" target="_blank" rel="noreferrer">GitHub Pages</a>` : '<span style="color:#888">Pages 미제출</span>'}
+          <a href="${s.instagramUrl}" target="_blank" rel="noreferrer">${s.instagramHandle}</a>
+        </div>
+      `;
+    }
+
+    function renderMap() {
+      const svg = document.getElementById('map');
+      const items = DATA.students.filter(s => scope === 'national' || s.regionGroup !== 'gyeongnam');
+      let out = '';
+      if (scope === 'national') {
+        out += '<path d="M270,55 L470,48 L565,120 L635,280 L615,390 L485,435 L335,455 L265,375 L255,210 Z" fill="#f1f1ed" stroke="#d4d4ce" stroke-width="1.5"/>';
+      } else {
+        out += '<path d="M55,345 Q240,320 410,360 T760,340" fill="none" stroke="#dbeafe" stroke-width="14" stroke-linecap="round"/>';
+        out += '<text x="150" y="348" font-size="11" fill="#60a5fa">한강 수계</text>';
+      }
+      DATA.students.forEach(s => {
+        s.mentionsPeerIds.forEach(pid => {
+          const t = DATA.students.find(x => x.id === pid);
+          if (!t) return;
+          if (scope === 'metro' && (s.regionGroup === 'gyeongnam' || t.regionGroup === 'gyeongnam')) return;
+          const p1 = project(s.lat, s.lng), p2 = project(t.lat, t.lng);
+          out += `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="#2563eb" stroke-dasharray="4 4" stroke-width="1.5" opacity="0.65"/>`;
+        });
+      });
+      items.forEach(s => {
+        const p = project(s.lat, s.lng);
+        const ox = scope === 'metro' && s.metroOffset ? s.metroOffset.dx : 0;
+        const oy = scope === 'metro' && s.metroOffset ? s.metroOffset.dy : 0;
+        const cx = p.x + ox, cy = p.y + oy;
+        const active = s.id === selectedId;
+        const color = DATA.regionColors[s.regionGroup] || '#111';
+        out += `<g style="cursor:pointer" onclick="selectStudent('${s.id}')">
+          <circle cx="${cx}" cy="${cy}" r="${active ? 10 : 7}" fill="${color}" stroke="#fff" stroke-width="2.5"/>
+          <text x="${cx}" y="${cy - 12}" text-anchor="middle" font-size="11.5" font-weight="${active ? '700' : '500'}" fill="#111113">${s.name}</text>
+        </g>`;
+      });
+      svg.innerHTML = out;
+    }
+
+    function renderGrid() {
+      const q = query.trim().toLowerCase();
+      const filtered = DATA.students.filter(s => {
+        if (!q) return true;
+        return [s.name, s.addressRaw, s.hobbiesRaw, s.treasureRaw, s.genderRaw].join(' ').toLowerCase().includes(q);
+      });
+      document.getElementById('grid').innerHTML = filtered.map(s => `
+        <article class="card" onclick="selectStudent('${s.id}')" style="cursor:pointer">
+          <div class="meta">${String(s.index).padStart(2,'0')} · ${s.cityLabel} · ${s.genderRaw}</div>
+          <h3 class="name">${s.name}</h3>
+          <div class="row">취미: ${s.hobbiesRaw}</div>
+          <div class="row">아끼는 것: ${s.treasureRaw}</div>
+          ${s.extraNote ? `<div class="note">${s.extraNote}</div>` : ''}
+          <div class="links">
+            <a href="${s.githubUrl}" target="_blank" rel="noreferrer" onclick="event.stopPropagation()">GitHub</a>
+            ${s.pagesUrl ? `<a href="${s.pagesUrl}" target="_blank" rel="noreferrer" onclick="event.stopPropagation()">Pages</a>` : '<span style="color:#888">Pages 없음</span>'}
+            <a href="${s.instagramUrl}" target="_blank" rel="noreferrer" onclick="event.stopPropagation()">${s.instagramHandle}</a>
+          </div>
+        </article>
+      `).join('');
+    }
+
+    window.selectStudent = function(id) {
+      selectedId = id;
+      renderMap();
+      renderInspector();
+    };
+
+    document.querySelectorAll('[data-scope]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        document.querySelectorAll('[data-scope]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        scope = btn.dataset.scope;
+        renderMap();
+      });
+    });
+
+    document.getElementById('search').addEventListener('input', (e) => {
+      query = e.target.value;
+      renderGrid();
+    });
+
+    renderMap();
+    renderInspector();
+    renderGrid();
+  </script>
+</body>
+</html>
